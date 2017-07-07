@@ -221,6 +221,11 @@ public class ScenarioToHTML {
 		Result r = beforeAfter.getResult();
 		createLine(sb, beforeOrAfter, RESULT_TYPE.typeFromResult(r));
 		sb.append(m.getLocation()).append(' ');
+		
+		endLine(sb);
+		addDuration(sb,RESULT_TYPE.typeFromResult(r),beforeAfter.getDuration());
+		
+		
 		addFailure(sb, r);
 		// XXX add argument formatting
 		// List<Argument> args = m.getArguments();
@@ -244,11 +249,16 @@ public class ScenarioToHTML {
 			 * Throwable t = result.getError(); if (t != null) { StackTraceElement stack[] = t.getStackTrace();
 			 * for (StackTraceElement ste : stack) { sb.append(ste.toString()).append("<br>"); } }
 			 */
+			 endLine(sb);
+			 addDuration(sb,RESULT_TYPE.FAILED,0.00f);
+		
 		}
 		else if ("undefined".equals(result.getStatus())) {
 			createLine(sb, "Undefined", RESULT_TYPE.UNDEFINED);
 			sb.append("Step is undefined");
 			// We have no error message.
+			endLine(sb);
+			addDuration(sb,RESULT_TYPE.FAILED,0.00f);
 		}
 		endLine(sb);
 		return sb;
@@ -264,6 +274,15 @@ public class ScenarioToHTML {
 			}
 		}
 		return sb;
+	}
+	
+	public void addDuration(StringBuilder sb, RESULT_TYPE type, float duration){
+		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(type.css).append("\">");
+		sb.append("<div style=\"padding-left: ").append(2).append("em;");
+		sb.append(type.css);
+		sb.append("\">");
+		if(duration!=0.00)
+			sb.append(duration);
 	}
 
 
@@ -281,6 +300,9 @@ public class ScenarioToHTML {
 		appendKeyword(sb, step.getKeyword());
 		sb.append(' ');
 		sb.append(step.getName());
+		endLine(sb);		
+		addDuration(sb,RESULT_TYPE.typeFromResult(stepResult.getResult()),stepResult.getDuration());
+		
 		if (step.getRows() != null) {
 			indent++;
 
@@ -319,6 +341,9 @@ public class ScenarioToHTML {
 			indent--;
 		}
 		endLine(sb);
+		
+		
+		
 		// TODO add support for table rows...
 		addFailure(sb, stepResult.getResult());
 		return sb;
