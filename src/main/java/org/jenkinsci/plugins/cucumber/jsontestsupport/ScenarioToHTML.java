@@ -129,10 +129,10 @@ public class ScenarioToHTML {
 			addComment(sb, comment);
 		}
 		for (Tag tag : tagStatement.getTags()) {
-			createLine(sb, tag.getLine(), RESULT_TYPE.NO_RESULT);
+			createLine(sb, tag.getLine(), RESULT_TYPE.NO_RESULT.css);
 			sb.append(tag.getName());
 		}
-		createLine(sb, tagStatement.getLine(), RESULT_TYPE.NO_RESULT);
+		createLine(sb, tagStatement.getLine(), RESULT_TYPE.NO_RESULT.css);
 		appendKeyword(sb, tagStatement.getKeyword()).append(' ').append(tagStatement.getName());
 		String descr = tagStatement.getDescription();
 		indent++;
@@ -142,7 +142,7 @@ public class ScenarioToHTML {
 			String[] lines = descr.split("\\n");
 			for (int i=0; i < lines.length; i++){
 				endLine(sb);
-				createLine(sb, tagStatement.getLine() + i+1, RESULT_TYPE.NO_RESULT);
+				createLine(sb, tagStatement.getLine() + i+1, RESULT_TYPE.NO_RESULT.css);
 				sb.append("<span style=\"font-style:italic\">");
 				sb.append(lines[i]);
 				sb.append("</span>");
@@ -156,7 +156,7 @@ public class ScenarioToHTML {
 		for (Comment comment : ds.getComments()) {
 			addComment(sb, comment);
 		}
-		createLine(sb, ds.getLine(), RESULT_TYPE.NO_RESULT);
+		createLine(sb, ds.getLine(), RESULT_TYPE.NO_RESULT.css);
 		appendKeyword(sb, ds.getKeyword());
 		sb.append(' ');
 		sb.append(ds.getName());
@@ -165,19 +165,19 @@ public class ScenarioToHTML {
 	}
 	
 	
-	private StringBuilder createLine(StringBuilder sb, Integer line, RESULT_TYPE type) {
+	private StringBuilder createLine(StringBuilder sb, Integer line, String cssFormatting) {
 		String lineStr = String.format("%03d", line);
-		return createLine(sb, lineStr, type);
+		return createLine(sb, lineStr, cssFormatting);
 	}
 
 
-	private StringBuilder createLine(StringBuilder sb, String str, RESULT_TYPE type) {
+	private StringBuilder createLine(StringBuilder sb, String str, String cssFormatting) {
 		sb.append("\n<tr><td valign=\"top\" align=\"right\"><a style=\"color:#808080\" name=\"").append(str).append("\">");
 		sb.append(str);
 		sb.append("</a></td>");
-		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(type.css).append("\">");
+		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(cssFormatting).append("\">");
 		sb.append("<div style=\"padding-left: ").append(indent).append("em;");
-		sb.append(type.css);
+		sb.append(cssFormatting);
 		sb.append("\">");
 		return sb;
 	}
@@ -189,7 +189,7 @@ public class ScenarioToHTML {
 
 
 	public StringBuilder addComment(StringBuilder sb, Comment comment) {
-		createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT);
+		createLine(sb, comment.getLine(), RESULT_TYPE.NO_RESULT.css);
 		sb.append("<span style=\"font-style:italic; color: #666666\">");
 		sb.append(comment.getValue());
 		sb.append("</span>");
@@ -210,7 +210,7 @@ public class ScenarioToHTML {
 	                                          BeforeAfterResult beforeAfter) {
 		Match m = beforeAfter.getMatch();
 		Result r = beforeAfter.getResult();
-		createLine(sb, beforeOrAfter, RESULT_TYPE.typeFromResult(r));
+		createLine(sb, beforeOrAfter, getCssFormatting(r));
 		sb.append(m.getLocation()).append(' ');
 		
 		endLine(sb);
@@ -230,7 +230,7 @@ public class ScenarioToHTML {
 
 	public StringBuilder addFailure(StringBuilder sb, Result result) {
 		if (Result.FAILED.equals(result.getStatus())) {
-			createLine(sb, "Failure", RESULT_TYPE.FAILED);
+			createLine(sb, "Failure", getCssFormatting(result));
 			String[] stack = result.getErrorMessage().split("\n");
 
 			sb.append(stack[0]).append("<br>");
@@ -248,7 +248,7 @@ public class ScenarioToHTML {
 		
 		}
 		else if ("undefined".equals(result.getStatus())) {
-			createLine(sb, "Undefined", RESULT_TYPE.UNDEFINED);
+			createLine(sb, "Undefined", getCssFormatting(result));
 			sb.append("Step is undefined");
 			// We have no error message.
 			endLine(sb);
@@ -289,7 +289,7 @@ public class ScenarioToHTML {
 				}
 			}
 		}
-		createLine(sb, step.getLine(), RESULT_TYPE.typeFromResult(stepResult.getResult()));
+		createLine(sb, step.getLine(), getCssFormatting(stepResult.getResult()));
 		appendKeyword(sb, step.getKeyword());
 		sb.append(' ');
 		sb.append(step.getName());
@@ -307,7 +307,7 @@ public class ScenarioToHTML {
 						addComment(sb, comment);
 					}
 				}
-				createLine(sb, dtr.getLine(), RESULT_TYPE.NO_RESULT);
+				createLine(sb, dtr.getLine(), RESULT_TYPE.NO_RESULT.css);
 				int colwidth = 100 / (dtr.getCells().size());
 				// these span multiple lines and divs don't wrap if the argument is too long
 				// so use a table per row with the same sizes for each column. ugly but works...
