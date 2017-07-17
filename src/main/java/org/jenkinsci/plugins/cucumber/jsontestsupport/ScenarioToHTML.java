@@ -23,16 +23,7 @@
  */
 package org.jenkinsci.plugins.cucumber.jsontestsupport;
 
-import gherkin.formatter.Argument;
-import gherkin.formatter.model.Background;
-import gherkin.formatter.model.Comment;
-import gherkin.formatter.model.DataTableRow;
-import gherkin.formatter.model.DescribedStatement;
-import gherkin.formatter.model.Match;
-import gherkin.formatter.model.Result;
-import gherkin.formatter.model.Step;
-import gherkin.formatter.model.Tag;
-import gherkin.formatter.model.TagStatement;
+import gherkin.formatter.model.*;
 
 import java.util.List;
 import java.util.Locale;
@@ -223,7 +214,7 @@ public class ScenarioToHTML {
 		sb.append(m.getLocation()).append(' ');
 		
 		endLine(sb);
-		addDuration(sb,RESULT_TYPE.typeFromResult(r),beforeAfter.getDuration());
+		addDuration(sb,getCssFormatting(r),beforeAfter.getDuration());
 		
 		
 		addFailure(sb, r);
@@ -233,6 +224,9 @@ public class ScenarioToHTML {
 		return sb;
 	}
 
+	protected String getCssFormatting(Result result){
+		return RESULT_TYPE.typeFromResult(result).css;
+	}
 
 	public StringBuilder addFailure(StringBuilder sb, Result result) {
 		if (Result.FAILED.equals(result.getStatus())) {
@@ -250,7 +244,7 @@ public class ScenarioToHTML {
 			 * for (StackTraceElement ste : stack) { sb.append(ste.toString()).append("<br>"); } }
 			 */
 			 endLine(sb);
-			 addDuration(sb,RESULT_TYPE.FAILED,0.00f);
+			 addDuration(sb,RESULT_TYPE.FAILED.css,0.00f);
 		
 		}
 		else if ("undefined".equals(result.getStatus())) {
@@ -258,7 +252,7 @@ public class ScenarioToHTML {
 			sb.append("Step is undefined");
 			// We have no error message.
 			endLine(sb);
-			addDuration(sb,RESULT_TYPE.FAILED,0.00f);
+			addDuration(sb,RESULT_TYPE.FAILED.css,0.00f);
 		}
 		endLine(sb);
 		return sb;
@@ -275,14 +269,13 @@ public class ScenarioToHTML {
 		}
 		return sb;
 	}
-	
-	public void addDuration(StringBuilder sb, RESULT_TYPE type, float duration){
-		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(type.css).append("\">");
+
+    void addDuration(StringBuilder sb, String cssFormatting, float duration){
+		sb.append("<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"").append(cssFormatting).append("\">");
 		sb.append("<div style=\"padding-left: ").append(2).append("em;");
-		sb.append(type.css);
+		sb.append(cssFormatting);
 		sb.append("\">");
-		if(duration!=0.00)
-			sb.append(duration);
+        sb.append(String.format("%.3f", duration));
 	}
 
 
@@ -301,7 +294,7 @@ public class ScenarioToHTML {
 		sb.append(' ');
 		sb.append(step.getName());
 		endLine(sb);		
-		addDuration(sb,RESULT_TYPE.typeFromResult(stepResult.getResult()),stepResult.getDuration());
+		addDuration(sb,RESULT_TYPE.typeFromResult(stepResult.getResult()).css,stepResult.getDuration());
 		
 		if (step.getRows() != null) {
 			indent++;
