@@ -37,9 +37,13 @@ public class ScenarioToHTMLTest {
     private static final String EXPECTED_ADD_DURATION_HTML_FOR_PASSED_STEP =
             "<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"background-color: #e6ffcc;\">" +
                     "<div style=\"padding-left: 2em;background-color: #e6ffcc;\">1.500";
+    private static final String EXPECTED_ADD_DURATION_HTML_FOR_SKIPPED_STEP =
+            "<td nowrap=\"nowrap\" valign=\"top\" align=\"left\" style=\"background-color: #ffffcc;\">" +
+            "<div style=\"padding-left: 2em;background-color: #ffffcc;\">0.000";
 
     private static final String ERROR_MESSAGE = "";
     private static final String UNDEFINED_RESULT_STATUS = "undefined";
+    private static final String SKIPPED_RESULT_STATUS = "skipped";
     private static final String TABLE_TAG = "<table>";
 
     private StringBuilder html;
@@ -52,6 +56,8 @@ public class ScenarioToHTMLTest {
     private Match match;
     @Mock
     private Result result;
+    @Mock
+    private StepResult stepResult;
     @Mock
     private Step step;
 
@@ -67,6 +73,8 @@ public class ScenarioToHTMLTest {
         when(beforeAfterResult.getDuration()).thenReturn(DURATION);
         when(step.getComments()).thenReturn(null);
         when(result.getErrorMessage()).thenReturn(ERROR_MESSAGE);
+        when(stepResult.getStep()).thenReturn(step);
+        when(stepResult.getResult()).thenReturn(result);
     }
 
     @Test
@@ -127,6 +135,26 @@ public class ScenarioToHTMLTest {
         when(result.getStatus()).thenReturn(UNDEFINED_RESULT_STATUS);
 
         String actual = scenarioToHTML.addFailure(html, result).toString();
+
+        assertFalse(actual.contains(EXPECTED_ADD_DURATION_HTML_FOR_PASSED_STEP));
+    }
+
+    @Test
+    public void shouldAddDurationInAddStepResult() {
+        Mockito.doReturn(SKIPPED_STEP_CSS).when(scenarioToHTML).getCssFormatting(result);
+        when(result.getStatus()).thenReturn(SKIPPED_RESULT_STATUS);
+
+        String actual = scenarioToHTML.addStepResult(html, stepResult).toString();
+
+        assertTrue(actual.contains(EXPECTED_ADD_DURATION_HTML_FOR_SKIPPED_STEP));
+    }
+
+    @Test
+    public void shouldNotContainAddDurationInAddStepResultForInvalidStep() {
+        Mockito.doReturn(SKIPPED_STEP_CSS).when(scenarioToHTML).getCssFormatting(result);
+        when(result.getStatus()).thenReturn(SKIPPED_RESULT_STATUS);
+
+        String actual = scenarioToHTML.addStepResult(html, stepResult).toString();
 
         assertFalse(actual.contains(EXPECTED_ADD_DURATION_HTML_FOR_PASSED_STEP));
     }
